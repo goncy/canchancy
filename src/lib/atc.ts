@@ -73,7 +73,11 @@ export async function getCourtsData(field: string, date: string) {
 
   for (const court of data.available_courts) {
     for (const slot of court.available_slots) {
-      const slotStart = format(new Date(slot.start), "HH:mm");
+      const slotStart = format({
+        date: new Date(slot.start),
+        format: "HH:mm",
+        tz: "America/Argentina/Buenos_Aires",
+      });
 
       // Initialize the court if it doesn't exist
       if (!availableTimes[court.id]) {
