@@ -32,13 +32,13 @@ Collect the following credentials that you'll need for your `.env.local` file:
 
 ## Step 4: Add Bot to Your Server
 
-1. Go to the "OAuth2" tab, then "URL Generator"
+1. Go to the "Installation" tab
 2. Select the scopes:
    - `bot`
    - `applications.commands`
 3. Select the bot permissions:
    - "Send Messages"
-4. Copy the generated URL and open it in your browser
+4. Copy the generated URL in the Install Link section and open it in your browser
 5. Select the server you want to add the bot to and authorize it
 6. After adding the bot, get your `GUILD_ID` by enabling Developer Mode in Discord (User Settings > Advanced > Developer Mode), then right-clicking on your server and selecting "Copy ID"
 
