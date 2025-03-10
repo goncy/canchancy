@@ -6,13 +6,15 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:courts": "tsx src/scripts/test.ts"
   },
   "dependencies": {
     "@formkit/tempo": "^0.1.2",
     "next": "15.2.0-canary.64",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "tsx": "^4.19.3",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
