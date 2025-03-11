@@ -1,4 +1,3 @@
-import {NextResponse} from "next/server";
 import nacl from "tweetnacl";
 
 type DiscordInteraction = {
@@ -42,12 +41,23 @@ type DiscordInteraction = {
   };
 };
 
+type DiscordMessage = {
+  id: string;
+  content: string;
+  author: {
+    id: string;
+    username: string;
+    global_name: string;
+  };
+  timestamp: string;
+};
+
 export async function verifyRequest(request: Request) {
   const signature = request.headers.get("x-signature-ed25519");
   const timestamp = request.headers.get("x-signature-timestamp");
 
   if (!signature || !timestamp) {
-    return NextResponse.json({error: "Missing signature or timestamp"}, {status: 400});
+    throw new Error("Missing signature or timestamp");
   }
 
   const rawBody = await request.text();
@@ -63,4 +73,33 @@ export async function verifyRequest(request: Request) {
   }
 
   return JSON.parse(rawBody) as DiscordInteraction;
+}
+
+export async function getMessage(
+  messageId: string,
+  channelId: string = process.env.DEFAULT_CHANNEL_ID!,
+): Promise<DiscordMessage> {
+  const url = `https://discord.com/api/v10/channels/${channelId}/messages/${messageId}`;
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bot ${process.env.BOT_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => "No error body");
+
+    throw new Error(
+      `Failed to fetch message: ${response.status} ${response.statusText}\n` +
+        `Channel ID: ${process.env.DISCORD_GUILD_ID}\n` +
+        `Message ID: ${messageId}\n` +
+        `Error body: ${errorBody}`,
+    );
+  }
+
+  const message = await response.json();
+
+  return message;
 }

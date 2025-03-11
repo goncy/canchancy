@@ -1,6 +1,6 @@
 import {format} from "@formkit/tempo";
 
-type FieldAvailability = {
+type CourtAvailability = {
   id: string;
   permalink: string;
   name: string;
@@ -64,10 +64,10 @@ type FieldAvailability = {
   }[];
 };
 
-export async function getCourtsData(field: string, date: string) {
+export async function getCourts(field: string, date: string) {
   const data = await fetch(
     `https://alquilatucancha.com/api/v3/availability/sportclubs/${field}?date=${date}`,
-  ).then((res) => res.json() as Promise<FieldAvailability>);
+  ).then((res) => res.json() as Promise<CourtAvailability>);
 
   const availableTimes: Record<string, {name: string; slots: string[]}> = {};
 

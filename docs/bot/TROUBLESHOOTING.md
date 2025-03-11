@@ -24,11 +24,29 @@ Incorrect environment variables can cause silent failures.
 **Verify these variables are set correctly:**
 - `DISCORD_PUBLIC_KEY`: Must match exactly what's in your Discord Developer Portal
 - `APPLICATION_ID`: Your Discord application ID
-- `GUILD_ID`: The ID of your Discord server
+- `DISCORD_GUILD_ID`: The ID of your Discord server
+- `DEFAULT_CHANNEL_ID`: The ID of your default channel for notifications
 - `BOT_TOKEN`: Your bot's token
 - `SECRET`: Your custom secret for the register endpoint
+- `PLAYERS_TSV`: Valid and accessible Google Sheets TSV URL for players data
+- `LOCATIONS_TSV`: Valid and accessible Google Sheets TSV URL for locations data
 
-### 3. Add Comprehensive Logging
+### 3. Google Sheets Data Access
+
+If the bot can't access player or location data:
+
+1. Verify your Google Sheets URLs:
+   - Open the TSV URLs in an incognito browser window to ensure they're publicly accessible
+   - Check that the sheet is still published to the web
+   - Ensure you're using the correct TSV format URL
+
+2. Common Google Sheets issues:
+   - Sheet permissions have changed
+   - Sheet has been unpublished
+   - Sheet ID or gid has changed
+   - Rate limiting from too many requests
+
+### 4. Add Comprehensive Logging
 
 Add detailed logging to help identify where the issue is occurring:
 
@@ -61,7 +79,7 @@ If you're having trouble registering commands:
 When you visit the registration endpoint, you should receive a JSON response. If you get an error:
 
 - Verify the `SECRET` parameter matches your environment variable
-- Check that your `APPLICATION_ID`, `GUILD_ID`, and `BOT_TOKEN` are correct
+- Check that your `APPLICATION_ID`, `DISCORD_GUILD_ID`, and `BOT_TOKEN` are correct
 - Ensure your bot has the "applications.commands" scope
 
 ### 2. Command Visibility
@@ -71,3 +89,4 @@ If commands are registered but not visible:
 - It may take up to an hour for commands to propagate to all Discord servers
 - Try restarting your Discord client
 - Verify the bot has been added to your server with the correct permissions
+- Check that you're using the correct `DISCORD_GUILD_ID` for your server

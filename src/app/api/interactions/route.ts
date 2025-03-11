@@ -1,7 +1,8 @@
 import {NextResponse} from "next/server";
 
-import {verifyRequest} from "@/lib/discord";
-import {getCourtsData} from "@/lib/atc";
+import {getMessage, verifyRequest} from "@/lib/discord";
+import {getCourts} from "@/lib/atc";
+import {getTeamsFromMessage} from "@/lib/dincy";
 
 export async function POST(request: Request) {
   const body = await verifyRequest(request);
@@ -17,15 +18,36 @@ export async function POST(request: Request) {
       case "reserva": {
         const [court, date] = body.data.options!;
 
-        const fieldData = await getCourtsData(court.value as string, date.value as string);
+        const courts = await getCourts(court.value as string, date.value as string);
 
         return NextResponse.json({
           type: 4,
           data: {
-            content: `Las canchas disponibles para **${fieldData.name}** el **${date.value}** son:\n${fieldData.courts.map((court) => `- **${court.name}**: ${court.slots.join(", ")}`).join("\n")}`,
+            content: `Las canchas disponibles para **${courts.name}** el **${date.value}** son:\n${courts.courts.map((court) => `- **${court.name}**: ${court.slots.join(", ")}`).join("\n")}`,
           },
         });
       }
+
+      case "equipos": {
+        const [messageId] = body.data.options!;
+
+        const message = await getMessage(messageId.value as string, body.channel_id);
+        const teams = await getTeamsFromMessage(message.content);
+
+        return NextResponse.json({
+          type: 4,
+          data: {
+            content: teams
+              .map((team, index) => {
+                const teamList = team.map((player) => `• ${player.name}`).join("\n");
+
+                return index === 0 ? `${teamList}\n\n**VS**\n\n` : teamList;
+              })
+              .join(""),
+          },
+        });
+      }
+
       default:
         return new Response("Unknown command", {status: 400});
     }
