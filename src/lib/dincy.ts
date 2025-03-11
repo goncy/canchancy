@@ -63,17 +63,13 @@ export async function getLocations() {
 }
 
 export async function getTeamsFromMessage(message: string) {
-  "use cache";
-
-  cacheLife("max");
-  cacheTag("teams");
-
   const players = await getPlayers();
   const names = message
-    .split("Lista de Espera de Confirmación:\n")[1]
+    .split("**Lista de Espera de Confirmación:**\n")[1]
     .split("\n\n")[0]
     .split("\n")
-    .map((player) => player.trim());
+    .map((player) => player.trim())
+    .map((player) => player.replace(/^[\d.\s-]+/, "").trim());
 
   const roster = names.map((name) => {
     const player = players.find(
