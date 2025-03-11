@@ -1,6 +1,6 @@
-# Canchancy Discord Bot - Installation Guide
+# Fulboncy Discord Bot - Installation Guide
 
-This guide will walk you through the process of setting up and deploying the Canchancy Discord bot
+This guide will walk you through the process of setting up and deploying the Fulboncy Discord bot
 
 ## Prerequisites
 
@@ -11,7 +11,7 @@ This guide will walk you through the process of setting up and deploying the Can
 ## Step 1: Create a Discord Application
 
 1. Go to the [Discord Developer Portal](https://discord.com/developers/applications)
-2. Click on "New Application" and give your bot a name (e.g., "Canchancy-test")
+2. Click on "New Application" and give your bot a name (e.g., "Fulboncy-test")
 3. Navigate to the "Bot" tab and click "Add Bot"
 
 ## Step 2: Configure Bot Permissions

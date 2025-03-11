@@ -1,4 +1,4 @@
-# Canchancy Discord Bot - Troubleshooting Guide
+# Fulboncy Discord Bot - Troubleshooting Guide
 
 This guide provides solutions for common issues you might encounter when setting up and using the bot
 
