@@ -44,6 +44,19 @@ export async function GET(request: NextRequest) {
             },
           ],
         },
+        {
+          name: "equipos",
+          description: "Arma equipos balanceados basado en la lista de convocados",
+          type: 1,
+          options: [
+            {
+              name: "mensaje",
+              description: "Mensaje con la lista de convocados",
+              type: 3,
+              required: true,
+            },
+          ],
+        },
       ]),
     },
   ).then((res) => res.json());
