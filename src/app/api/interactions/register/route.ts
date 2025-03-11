@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
           options: [
             {
               name: "mensaje",
-              description: "Mensaje con la lista de convocados",
+              description: "ID del mensaje con la lista de convocados",
               type: 3,
               required: true,
             },
