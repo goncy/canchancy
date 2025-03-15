@@ -73,7 +73,15 @@ export async function getTeamsFromMessage(message: string) {
 
   const roster = names.map((name) => {
     const player = players.find(
-      (player) => player.name.trim().toLowerCase() === name.trim().toLowerCase(),
+      (player) =>
+        player.name
+          .replace(/[^a-zA-Z0-9]/g, "")
+          .trim()
+          .toLowerCase() ===
+        name
+          .replace(/[^a-zA-Z0-9]/g, "")
+          .trim()
+          .toLowerCase(),
     );
 
     return player || {name: `${name} ⚠`, speed: 7, resistance: 7, technical: 7, average: 7};
