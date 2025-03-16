@@ -64,12 +64,20 @@ export async function getLocations() {
 
 export async function getTeamsFromMessage(message: string) {
   const players = await getPlayers();
-  const names = message
-    .split("**Lista de Espera de Confirmación:**\n")[1]
-    .split("\n\n")[0]
-    .split("\n")
+  let names: string[] = [];
+
+  if (message.includes("**Lista de Espera de Confirmación:**")) {
+    names = message.split("**Lista de Espera de Confirmación:**\n")[1].split("\n\n")[0].split("\n");
+  } else if (message.includes(",")) {
+    names = message.split(",");
+  } else {
+    names = message.split("\n");
+  }
+
+  names = names
     .map((player) => player.trim())
-    .map((player) => player.replace(/^[\d.\s-]+/, "").trim());
+    .map((player) => player.replace(/^[\d.\s-]+/, "").trim())
+    .filter((player) => player !== "");
 
   const roster = names.map((name) => {
     const player = players.find(
