@@ -14,23 +14,13 @@ import {getCourts} from "@/lib/atc";
  */
 const DAYS_TO_SHOW = 7;
 
-interface DaysListProps {
-  searchParams: Promise<{date: string}>;
-}
-
-async function DaysList({searchParams}: DaysListProps) {
+async function getAvailabilityData(today: Date) {
   "use cache";
 
   cacheLife("minutes");
   cacheTag("availability");
 
-  const {date: dateFromSearchParams} = await searchParams;
-
-  const today = new Date();
-
-  const dateToDisplay = formatDate(dateFromSearchParams ? new Date(dateFromSearchParams) : today);
-
-  const availabilityData = Promise.all(
+  return Promise.all(
     Array.from({length: DAYS_TO_SHOW}, async (_, i) => {
       const date = addDay(today, i);
       const formattedDate = formatDate(date);
@@ -45,6 +35,18 @@ async function DaysList({searchParams}: DaysListProps) {
       };
     }),
   );
+}
+
+interface DaysListProps {
+  searchParams: Promise<{date: string}>;
+}
+
+async function DaysList({searchParams}: DaysListProps) {
+  const {date: dateFromSearchParams} = await searchParams;
+
+  const today = new Date();
+
+  const dateToDisplay = formatDate(dateFromSearchParams ? new Date(dateFromSearchParams) : today);
 
   return (
     <DayTabs dateToDisplay={dateToDisplay}>
@@ -60,7 +62,7 @@ async function DaysList({searchParams}: DaysListProps) {
         })}
       </TabsList>
 
-      {availabilityData.then((data) => (
+      {getAvailabilityData(today).then((data) => (
         <CourtsAvailability data={data} />
       ))}
     </DayTabs>
