@@ -49,7 +49,7 @@ async function DaysList({searchParams}: DaysListProps) {
   const dateToDisplay = formatDate(dateFromSearchParams ? new Date(dateFromSearchParams) : today);
 
   return (
-    <DayTabs dateToDisplay={dateToDisplay}>
+    <DayTabs className="w-full" dateToDisplay={dateToDisplay}>
       <TabsList className="grid grid-cols-7">
         {Array.from({length: DAYS_TO_SHOW}, (_, i) => {
           const date = addDay(today, i);
