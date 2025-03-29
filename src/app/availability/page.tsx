@@ -69,17 +69,38 @@ async function DaysList({searchParams}: DaysListProps) {
   );
 }
 
+function Legend() {
+  return (
+    <div className="flex justify-center gap-4 text-sm">
+      <div className="flex items-center gap-2">
+        <div className="h-3 w-3 rounded-full bg-blue-500" />
+        <span>Mañana (antes de las 12PM)</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="h-3 w-3 rounded-full bg-amber-500" />
+        <span>Tarde (12-6PM)</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="h-3 w-3 rounded-full bg-purple-500" />
+        <span>Noche (después de las 6PM)</span>
+      </div>
+    </div>
+  );
+}
+
 export default async function AvailabilityPage({
   searchParams,
 }: {
   searchParams: Promise<{date: string}>;
 }) {
   return (
-    <div className="flex min-h-screen w-full flex-col items-start gap-4">
+    <div className="flex w-full flex-col items-start justify-start gap-4">
       <h1 className="text-center text-3xl font-bold">Disponibilidad</h1>
 
-      <Suspense fallback={<div className="text-center">Loading availability data...</div>}>
+      <Suspense fallback={<div className="text-center">Cargando datos de disponibilidad...</div>}>
         <DaysList searchParams={searchParams} />
+
+        <Legend />
       </Suspense>
     </div>
   );
