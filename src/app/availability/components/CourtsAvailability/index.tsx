@@ -1,6 +1,6 @@
 "use client";
 
-import {useState} from "react";
+import {useSearchParams} from "next/navigation";
 
 import {FacilityCard} from "../FacilityCard";
 
@@ -21,18 +21,24 @@ interface CourtsAvailabilityProps {
 function FacilitySelector({
   facilities,
   selectedFacility,
-  setSelectedFacility,
 }: {
   facilities: Set<string>;
   selectedFacility: string;
-  setSelectedFacility: (facility: string) => void;
 }) {
+  const handleFacilityClick = (facility: string) => {
+    const searchParams = new URLSearchParams(window.location.search);
+
+    searchParams.set("facility", facility);
+
+    history.pushState(null, "", `/availability?${searchParams.toString()}`);
+  };
+
   return (
     <div className="flex flex-col items-start gap-6">
       <div className="flex justify-center gap-4">
         <Badge
           className={`cursor-pointer px-4 py-2 ${selectedFacility === "all" ? "bg-primary" : "bg-secondary"}`}
-          onClick={() => setSelectedFacility("all")}
+          onClick={() => handleFacilityClick("all")}
         >
           All Facilities
         </Badge>
@@ -40,7 +46,7 @@ function FacilitySelector({
           <Badge
             key={facility}
             className={`cursor-pointer px-4 py-2 ${selectedFacility === facility ? "bg-primary" : "bg-secondary"}`}
-            onClick={() => setSelectedFacility(facility)}
+            onClick={() => handleFacilityClick(facility)}
           >
             {facility}
           </Badge>
@@ -51,17 +57,15 @@ function FacilitySelector({
 }
 
 export function CourtsAvailability({data}: CourtsAvailabilityProps) {
-  const [selectedFacility, setSelectedFacility] = useState<string>("all");
+  const searchParams = useSearchParams();
+
+  const selectedFacility = searchParams.get("facility") || "all";
 
   const facilities = new Set(data.flatMap((day) => day.locations.map((location) => location.name)));
 
   return (
     <>
-      <FacilitySelector
-        facilities={facilities}
-        selectedFacility={selectedFacility}
-        setSelectedFacility={setSelectedFacility}
-      />
+      <FacilitySelector facilities={facilities} selectedFacility={selectedFacility} />
 
       {data.map((day) => (
         <TabsContent key={formatDate(day.date)} className="w-full" value={formatDate(day.date)}>

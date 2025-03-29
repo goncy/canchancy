@@ -16,7 +16,7 @@ export function formatDate(date: Date) {
   return format({
     date: date,
     format: "YYYY-MM-DD",
-    tz: TIMEZONE,
+    tz: "UTC",
   });
 }
 
@@ -24,6 +24,6 @@ export function formatDateWithDay(date: Date) {
   return format({
     date: date,
     format: "ddd, DD",
-    tz: TIMEZONE,
+    tz: "UTC",
   });
 }

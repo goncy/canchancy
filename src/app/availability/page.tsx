@@ -1,8 +1,10 @@
 import {Suspense} from "react";
 import {unstable_cacheLife as cacheLife, unstable_cacheTag as cacheTag} from "next/cache";
 
+import {DayTabs} from "./components/DayTabs";
+
 import {CourtsAvailability} from "@/app/availability/components/CourtsAvailability";
-import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {addDay, formatDate, formatDateWithDay} from "@/lib/dates";
 import {getLocations} from "@/lib/dincy";
 import {getCourts} from "@/lib/atc";
@@ -12,13 +14,21 @@ import {getCourts} from "@/lib/atc";
  */
 const DAYS_TO_SHOW = 7;
 
-export default async function AvailabilityPage() {
+interface DaysListProps {
+  searchParams: Promise<{date: string}>;
+}
+
+async function DaysList({searchParams}: DaysListProps) {
   "use cache";
 
   cacheLife("minutes");
   cacheTag("availability");
 
+  const {date: dateFromSearchParams} = await searchParams;
+
   const today = new Date();
+
+  const dateToDisplay = formatDate(dateFromSearchParams ? new Date(dateFromSearchParams) : today);
 
   const availabilityData = Promise.all(
     Array.from({length: DAYS_TO_SHOW}, async (_, i) => {
@@ -37,28 +47,38 @@ export default async function AvailabilityPage() {
   );
 
   return (
+    <DayTabs dateToDisplay={dateToDisplay}>
+      <TabsList className="grid grid-cols-7">
+        {Array.from({length: DAYS_TO_SHOW}, (_, i) => {
+          const date = addDay(today, i);
+
+          return (
+            <TabsTrigger key={formatDate(date)} value={formatDate(date)}>
+              {formatDateWithDay(date)}
+            </TabsTrigger>
+          );
+        })}
+      </TabsList>
+
+      {availabilityData.then((data) => (
+        <CourtsAvailability data={data} />
+      ))}
+    </DayTabs>
+  );
+}
+
+export default async function AvailabilityPage({
+  searchParams,
+}: {
+  searchParams: Promise<{date: string}>;
+}) {
+  return (
     <div className="flex min-h-screen w-full flex-col items-start gap-4">
       <h1 className="text-center text-3xl font-bold">Disponibilidad</h1>
 
-      <Tabs className="flex w-full flex-col gap-6" defaultValue={formatDate(today)}>
-        <TabsList className="grid grid-cols-7">
-          {Array.from({length: DAYS_TO_SHOW}, (_, i) => {
-            const date = addDay(today, i);
-
-            return (
-              <TabsTrigger key={formatDate(date)} value={formatDate(date)}>
-                {formatDateWithDay(date)}
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
-
-        <Suspense fallback={<div className="text-center">Loading availability data...</div>}>
-          {availabilityData.then((data) => (
-            <CourtsAvailability data={data} />
-          ))}
-        </Suspense>
-      </Tabs>
+      <Suspense fallback={<div className="text-center">Loading availability data...</div>}>
+        <DaysList searchParams={searchParams} />
+      </Suspense>
     </div>
   );
 }
