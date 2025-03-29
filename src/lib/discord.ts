@@ -1,6 +1,6 @@
 import nacl from "tweetnacl";
 
-type DiscordInteraction = {
+export type DiscordInteraction = {
   type: number; // 1 = PING, 2 = APPLICATION_COMMAND, etc.
   id: string; // ID de la interacción
   application_id: string; // ID de la aplicación (bot)
