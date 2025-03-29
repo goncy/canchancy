@@ -4,7 +4,8 @@ import {useSearchParams} from "next/navigation";
 
 import {FacilityCard} from "../FacilityCard";
 
-import {Badge} from "@/components/ui/badge";
+import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
+import {Label} from "@/components/ui/label";
 import {TabsContent} from "@/components/ui/tabs";
 import {LocationWithCourts} from "@/lib/atc";
 import {formatDate} from "@/lib/dates";
@@ -29,29 +30,48 @@ function FacilitySelector({
     const searchParams = new URLSearchParams(window.location.search);
 
     searchParams.set("facility", facility);
-
     history.pushState(null, "", `/availability?${searchParams.toString()}`);
   };
 
   return (
     <div className="flex flex-col items-start gap-6">
-      <div className="flex justify-center gap-4">
-        <Badge
-          className={`cursor-pointer px-4 py-2 ${selectedFacility === "all" ? "bg-primary" : "bg-secondary"}`}
-          onClick={() => handleFacilityClick("all")}
-        >
-          All Facilities
-        </Badge>
-        {Array.from(facilities).map((facility) => (
-          <Badge
-            key={facility}
-            className={`cursor-pointer px-4 py-2 ${selectedFacility === facility ? "bg-primary" : "bg-secondary"}`}
-            onClick={() => handleFacilityClick(facility)}
-          >
-            {facility}
-          </Badge>
-        ))}
-      </div>
+      <RadioGroup
+        className="flex justify-center gap-4"
+        defaultValue={selectedFacility}
+        onValueChange={handleFacilityClick}
+      >
+        <div className="flex flex-wrap justify-center gap-4">
+          <div className="relative">
+            <RadioGroupItem className="peer sr-only" id="all" value="all" />
+            <Label
+              className={`cursor-pointer rounded-full px-4 py-2 transition-all ${
+                selectedFacility === "all"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-secondary-foreground"
+              } peer-focus-visible:ring-primary peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:outline-none`}
+              htmlFor="all"
+            >
+              All Facilities
+            </Label>
+          </div>
+
+          {Array.from(facilities).map((facility) => (
+            <div key={facility} className="relative">
+              <RadioGroupItem className="peer sr-only" id={facility} value={facility} />
+              <Label
+                className={`cursor-pointer rounded-full px-4 py-2 transition-all ${
+                  selectedFacility === facility
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground"
+                } peer-focus-visible:ring-primary peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:outline-none`}
+                htmlFor={facility}
+              >
+                {facility}
+              </Label>
+            </div>
+          ))}
+        </div>
+      </RadioGroup>
     </div>
   );
 }
