@@ -1,4 +1,4 @@
-import {format} from "@formkit/tempo";
+import {formatTime} from "./dates";
 
 type CourtAvailability = {
   id: string;
@@ -73,11 +73,7 @@ export async function getCourts(field: string, date: string) {
 
   for (const court of data.available_courts) {
     for (const slot of court.available_slots) {
-      const slotStart = format({
-        date: new Date(slot.start),
-        format: "HH:mm",
-        tz: "America/Argentina/Buenos_Aires",
-      });
+      const slotStart = formatTime(new Date(slot.start));
 
       // Initialize the court if it doesn't exist
       if (!availableTimes[court.id]) {
@@ -98,3 +94,5 @@ export async function getCourts(field: string, date: string) {
     courts: Object.values(availableTimes),
   };
 }
+
+export type LocationWithCourts = Awaited<ReturnType<typeof getCourts>>;
