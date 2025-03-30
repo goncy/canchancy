@@ -2,6 +2,7 @@ import {unstable_cacheLife as cacheLife, unstable_cacheTag as cacheTag} from "ne
 
 type Player = {
   name: string;
+  alias: string[];
   speed: number;
   resistance: number;
   technical: number;
@@ -12,6 +13,13 @@ type Location = {
   id: string;
   name: string;
 };
+
+function cleanName(name: string) {
+  return name
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .trim()
+    .toLowerCase();
+}
 
 export async function getPlayers() {
   "use cache";
@@ -28,9 +36,11 @@ export async function getPlayers() {
     .slice(1)
     .map((row) => {
       const [name, speed, resistance, technical, average] = row.split("\t");
+      const alias = name.split(",").slice(1);
 
       return {
         name: name.trim(),
+        alias: alias.map((alias) => alias.trim()),
         speed: parseInt(speed),
         resistance: parseInt(resistance),
         technical: parseInt(technical),
@@ -80,19 +90,21 @@ export async function getTeamsFromMessage(message: string) {
     .filter((player) => player !== "");
 
   const roster = names.map((name) => {
-    const player = players.find(
-      (player) =>
-        player.name
-          .replace(/[^a-zA-Z0-9]/g, "")
-          .trim()
-          .toLowerCase() ===
-        name
-          .replace(/[^a-zA-Z0-9]/g, "")
-          .trim()
-          .toLowerCase(),
+    // Get the player based on its name or alias
+    const player = players.find((player) =>
+      [player.name, ...player.alias].some((alias) => cleanName(alias) === cleanName(name)),
     );
 
-    return player || {name: `${name} ⚠`, speed: 7, resistance: 7, technical: 7, average: 7};
+    return (
+      player || {
+        name: `${name} ⚠`,
+        speed: 7,
+        resistance: 7,
+        technical: 7,
+        average: 7,
+        alias: [name],
+      }
+    );
   });
 
   let bestDiff = Infinity;
