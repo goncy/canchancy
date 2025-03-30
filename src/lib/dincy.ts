@@ -35,8 +35,8 @@ export async function getPlayers() {
     .split("\n")
     .slice(1)
     .map((row) => {
-      const [name, speed, resistance, technical, average] = row.split("\t");
-      const alias = name.split(",").slice(1);
+      const [names, speed, resistance, technical, average] = row.split("\t");
+      const [name, ...alias] = names.split(",");
 
       return {
         name: name.trim(),
