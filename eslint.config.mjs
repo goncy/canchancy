@@ -59,6 +59,7 @@ export default [
       ...eslintPluginReactHooks.configs.recommended.rules,
       ...vercelStyleGuideReact.rules,
       "react/prop-types": "off",
+      "react/no-array-index-key": "off",
       "react/jsx-uses-react": "off",
       "react/react-in-jsx-scope": "off",
       "react/self-closing-comp": "warn",

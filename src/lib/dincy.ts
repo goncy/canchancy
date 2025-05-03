@@ -1,3 +1,5 @@
+"use server";
+
 import {unstable_cacheLife as cacheLife, unstable_cacheTag as cacheTag} from "next/cache";
 
 type Player = {
@@ -72,7 +74,7 @@ export async function getLocations() {
     }) as Location[];
 }
 
-export async function getTeamsFromMessage(message: string) {
+export async function getTeamsFromMessage(message: string, teamsCount: number = 2) {
   const players = await getPlayers();
   let names: string[] = [];
 
@@ -107,39 +109,41 @@ export async function getTeamsFromMessage(message: string) {
     );
   });
 
-  let bestDiff = Infinity;
-  let teams: [Player[], Player[]] = [[], []];
+  // Sort players by average skill in descending order
+  const sortedPlayers = [...roster].sort((a, b) => b.average - a.average);
 
-  // Try all possible team combinations using bit manipulation
-  for (let i = 0; i < 1 << roster.length; i++) {
-    const teamA: Player[] = [];
-    const teamB: Player[] = [];
-    let sumA = 0;
-    let sumB = 0;
+  // Initialize teams and their total scores
+  const teams: Player[][] = Array(teamsCount)
+    .fill([])
+    .map(() => []);
+  const teamSums = Array(teamsCount).fill(0);
 
-    // Assign players to teams based on binary representation
-    for (let j = 0; j < roster.length; j++) {
-      if ((i & (1 << j)) !== 0) {
-        teamA.push(roster[j]);
-        sumA += roster[j].average;
-      } else {
-        teamB.push(roster[j]);
-        sumB += roster[j].average;
+  // For each player, try assigning them to each team and pick the best result
+  sortedPlayers.forEach((player) => {
+    let bestDiff = Infinity;
+    let bestTeamIndex = 0;
+
+    // Try assigning the player to each team
+    for (let teamIndex = 0; teamIndex < teamsCount; teamIndex++) {
+      // Create temporary arrays to simulate the assignment
+      const tempTeamSums = [...teamSums];
+
+      tempTeamSums[teamIndex] += player.average;
+
+      // Calculate the maximum difference between any two teams
+      const maxDiff = Math.max(...tempTeamSums) - Math.min(...tempTeamSums);
+
+      // If this assignment results in better balance, keep it
+      if (maxDiff < bestDiff) {
+        bestDiff = maxDiff;
+        bestTeamIndex = teamIndex;
       }
     }
 
-    const diff = Math.abs(sumA - sumB);
-
-    // Update teams if current split is better balanced
-    if (
-      diff < bestDiff ||
-      (diff === bestDiff &&
-        Math.abs(teamA.length - teamB.length) < Math.abs(teams[0].length - teams[1].length))
-    ) {
-      bestDiff = diff;
-      teams = [teamA, teamB];
-    }
-  }
+    // Assign player to the best team
+    teams[bestTeamIndex].push(player);
+    teamSums[bestTeamIndex] += player.average;
+  });
 
   return teams;
 }

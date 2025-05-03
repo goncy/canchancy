@@ -55,6 +55,13 @@ export async function GET(request: NextRequest) {
               type: 3,
               required: true,
             },
+            {
+              name: "equipos",
+              description: "Número de equipos a formar",
+              type: 3,
+              required: true,
+              min_value: 2,
+            },
           ],
         },
       ]),

@@ -29,10 +29,10 @@ export async function POST(request: Request) {
       }
 
       case "equipos": {
-        const [messageId] = body.data.options!;
+        const [messageId, teamsCount] = body.data.options!;
 
         const message = await getMessage(messageId.value as string, body.channel_id);
-        const teams = await getTeamsFromMessage(message.content);
+        const teams = await getTeamsFromMessage(message.content, teamsCount?.value as number);
 
         return NextResponse.json({
           type: 4,
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
               .map((team, index) => {
                 const teamList = team.map((player) => `• ${player.name}`).join("\n");
 
-                return index === 0 ? `${teamList}\n\n**VS**\n\n` : teamList;
+                return index === teams.length - 1 ? teamList : `${teamList}\n\n**VS**\n\n`;
               })
               .join(""),
           },

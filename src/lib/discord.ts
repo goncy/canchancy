@@ -1,3 +1,5 @@
+"use server";
+
 import nacl from "tweetnacl";
 
 type DiscordInteraction = {

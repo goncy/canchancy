@@ -19,6 +19,15 @@ const nextConfig: NextConfig = {
       fullUrl: true,
     },
   },
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/teams",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
