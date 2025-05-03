@@ -74,7 +74,7 @@ export async function getLocations() {
     }) as Location[];
 }
 
-export async function getTeamsFromMessage(message: string, teamsCount: number = 2) {
+export async function getTeamsFromMessage(message: string, teamsCount: number) {
   const players = await getPlayers();
   let names: string[] = [];
 

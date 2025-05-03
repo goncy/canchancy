@@ -32,7 +32,10 @@ export async function POST(request: Request) {
         const [messageId, teamsCount] = body.data.options!;
 
         const message = await getMessage(messageId.value as string, body.channel_id);
-        const teams = await getTeamsFromMessage(message.content, teamsCount?.value as number);
+        const teams = await getTeamsFromMessage(
+          message.content,
+          teamsCount?.value ? Number(teamsCount.value) : 2,
+        );
 
         return NextResponse.json({
           type: 4,
