@@ -74,41 +74,7 @@ export async function getLocations() {
     }) as Location[];
 }
 
-export async function getTeamsFromMessage(message: string, teamsCount: number) {
-  const players = await getPlayers();
-  let names: string[] = [];
-
-  if (message.includes("**Lista de Espera de Confirmación:**")) {
-    names = message.split("**Lista de Espera de Confirmación:**\n")[1].split("\n\n")[0].split("\n");
-  } else if (message.includes(",")) {
-    names = message.split(",");
-  } else {
-    names = message.split("\n");
-  }
-
-  names = names
-    .map((player) => player.trim())
-    .map((player) => player.replace(/^[\d.\s-]+/, "").trim())
-    .filter((player) => player !== "");
-
-  const roster = names.map((name) => {
-    // Get the player based on its name or alias
-    const player = players.find((player) =>
-      [player.name, ...player.alias].some((alias) => cleanName(alias) === cleanName(name)),
-    );
-
-    return (
-      player || {
-        name: `${name} ⚠`,
-        speed: 7,
-        resistance: 7,
-        technical: 7,
-        average: 7,
-        alias: [name],
-      }
-    );
-  });
-
+function balanceTeamsGreedy(roster: Player[], teamsCount: number): Player[][] {
   // Sort players by average skill in descending order
   const sortedPlayers = [...roster].sort((a, b) => b.average - a.average);
 
@@ -146,4 +112,100 @@ export async function getTeamsFromMessage(message: string, teamsCount: number) {
   });
 
   return teams;
+}
+
+function balanceTeamsBruteForce(roster: Player[], teamsCount: number): Player[][] {
+  let bestDiff = Infinity;
+  let bestTeams: Player[][] = Array(teamsCount)
+    .fill([])
+    .map(() => []);
+
+  // Generate all possible combinations of players for the first team
+  const generateCombinations = (players: Player[], size: number): Player[][] => {
+    if (size === 0) return [[]];
+    if (players.length === 0) return [];
+
+    const [first, ...rest] = players;
+    const withFirst = generateCombinations(rest, size - 1).map((combo) => [first, ...combo]);
+    const withoutFirst = generateCombinations(rest, size);
+
+    return [...withFirst, ...withoutFirst];
+  };
+
+  // Try all possible team sizes for the first team
+  for (let teamSize = 0; teamSize <= roster.length; teamSize++) {
+    const teamCombinations = generateCombinations(roster, teamSize);
+
+    for (const firstTeam of teamCombinations) {
+      const remainingPlayers = roster.filter((player) => !firstTeam.includes(player));
+
+      // Recursively balance remaining players into remaining teams
+      const remainingTeams =
+        teamsCount === 1 ? [] : balanceTeamsBruteForce(remainingPlayers, teamsCount - 1);
+
+      const allTeams = [firstTeam, ...remainingTeams];
+      const teamSums = allTeams.map((team) =>
+        team.reduce((sum, player) => sum + player.average, 0),
+      );
+      const maxDiff = Math.max(...teamSums) - Math.min(...teamSums);
+
+      if (maxDiff < bestDiff) {
+        bestDiff = maxDiff;
+        bestTeams = allTeams;
+      }
+    }
+  }
+
+  return bestTeams;
+}
+
+export async function getTeamsFromMessage(message: string, teamsCount: number) {
+  const players = await getPlayers();
+  let names: string[] = [];
+
+  if (message.includes("**Lista de Espera de Confirmación:**")) {
+    names = message.split("**Lista de Espera de Confirmación:**\n")[1].split("\n\n")[0].split("\n");
+  } else if (message.includes(",")) {
+    names = message.split(",");
+  } else {
+    names = message.split("\n");
+  }
+
+  names = names
+    .map((player) => player.trim())
+    .map((player) =>
+      player
+        .replace(/^[\d.\s-]+/, "")
+        .replace(/\s*⚠$/, "")
+        .trim(),
+    )
+    .filter((player) => player !== "");
+
+  const roster = names.map((name) => {
+    // Get the player based on its name or alias
+    const player = players.find((player) =>
+      [player.name, ...player.alias].some((alias) => cleanName(alias) === cleanName(name)),
+    );
+
+    return (
+      player || {
+        name: `${name} ⚠`,
+        speed: 7,
+        resistance: 7,
+        technical: 7,
+        average: 7,
+        alias: [name],
+      }
+    );
+  });
+
+  // Calculate the number of permutations
+  const permutationCount = Math.pow(teamsCount, roster.length);
+
+  // Choose algorithm based on roster size and number of teams
+  if (permutationCount < 1_500_000) {
+    return balanceTeamsBruteForce(roster, teamsCount);
+  } else {
+    return balanceTeamsGreedy(roster, teamsCount);
+  }
 }
