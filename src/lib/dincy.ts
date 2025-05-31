@@ -116,43 +116,32 @@ function balanceTeamsGreedy(roster: Player[], teamsCount: number): Player[][] {
 
 function balanceTeamsBruteForce(roster: Player[], teamsCount: number): Player[][] {
   let bestDiff = Infinity;
-  let bestTeams: Player[][] = Array(teamsCount)
-    .fill([])
-    .map(() => []);
+  let bestTeams: Player[][] = Array.from({length: teamsCount}, () => []);
 
-  // Generate all possible combinations of players for the first team
-  const generateCombinations = (players: Player[], size: number): Player[][] => {
-    if (size === 0) return [[]];
-    if (players.length === 0) return [];
+  // Calculate the number of possible combinations
+  const combinations = Math.pow(teamsCount, roster.length);
 
-    const [first, ...rest] = players;
-    const withFirst = generateCombinations(rest, size - 1).map((combo) => [first, ...combo]);
-    const withoutFirst = generateCombinations(rest, size);
+  // Try all possible team combinations
+  for (let i = 0; i < combinations; i++) {
+    const teams: Player[][] = Array.from({length: teamsCount}, () => []);
+    const teamSums: number[] = Array(teamsCount).fill(0);
 
-    return [...withFirst, ...withoutFirst];
-  };
+    // Assign players to teams based on the combination number
+    for (let j = 0; j < roster.length; j++) {
+      // Calculate which team this player goes to
+      const teamIndex = Math.floor(i / Math.pow(teamsCount, j)) % teamsCount;
 
-  // Try all possible team sizes for the first team
-  for (let teamSize = 0; teamSize <= roster.length; teamSize++) {
-    const teamCombinations = generateCombinations(roster, teamSize);
+      teams[teamIndex].push(roster[j]);
+      teamSums[teamIndex] += roster[j].average;
+    }
 
-    for (const firstTeam of teamCombinations) {
-      const remainingPlayers = roster.filter((player) => !firstTeam.includes(player));
+    // Calculate the maximum difference between any two teams
+    const maxDiff = Math.max(...teamSums) - Math.min(...teamSums);
 
-      // Recursively balance remaining players into remaining teams
-      const remainingTeams =
-        teamsCount === 1 ? [] : balanceTeamsBruteForce(remainingPlayers, teamsCount - 1);
-
-      const allTeams = [firstTeam, ...remainingTeams];
-      const teamSums = allTeams.map((team) =>
-        team.reduce((sum, player) => sum + player.average, 0),
-      );
-      const maxDiff = Math.max(...teamSums) - Math.min(...teamSums);
-
-      if (maxDiff < bestDiff) {
-        bestDiff = maxDiff;
-        bestTeams = allTeams;
-      }
+    // Update teams if current split is better balanced
+    if (maxDiff < bestDiff) {
+      bestDiff = maxDiff;
+      bestTeams = teams;
     }
   }
 
