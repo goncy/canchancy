@@ -79,13 +79,13 @@ export async function verifyRequest(request: Request) {
 
 export async function getMessage(
   messageId: string,
-  channelId: string = process.env.DEFAULT_CHANNEL_ID!,
+  channelId: string = process.env.DISCORD_DEFAULT_CHANNEL_ID!,
 ): Promise<DiscordMessage> {
   const response = await fetch(
     `https://discord.com/api/v10/channels/${channelId}/messages/${messageId}`,
     {
       headers: {
-        Authorization: `Bot ${process.env.BOT_TOKEN}`,
+        Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
         "Content-Type": "application/json",
       },
     },
@@ -108,16 +108,15 @@ export async function getMessage(
 }
 
 export async function sendFollowupMessage(
-  applicationId: string,
   interactionToken: string,
   content: string,
 ): Promise<void> {
   const response = await fetch(
-    `https://discord.com/api/v10/webhooks/${applicationId}/${interactionToken}`,
+    `https://discord.com/api/v10/webhooks/${process.env.DISCORD_DISCORD_APPLICATION_ID}/${interactionToken}`,
     {
       method: "POST",
       headers: {
-        Authorization: `Bot ${process.env.BOT_TOKEN}`,
+        Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

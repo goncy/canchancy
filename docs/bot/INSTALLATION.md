@@ -25,10 +25,10 @@ This guide will walk you through the process of setting up and deploying the Ful
 Collect the following credentials that you'll need for your `.env.local` file:
 
 1. From the "General Information" tab:
-   - `APPLICATION_ID`: Copy your Application ID
+   - `DISCORD_APPLICATION_ID`: Copy your Application ID
 
 2. From the "Bot" tab:
-   - `BOT_TOKEN`: Click "Reset Token" and copy the new token
+   - `DISCORD_BOT_TOKEN`: Click "Reset Token" and copy the new token
    - `DISCORD_PUBLIC_KEY`: Copy the Public Key
 
 ## Step 4: Add Bot to Your Server
@@ -44,7 +44,7 @@ Collect the following credentials that you'll need for your `.env.local` file:
 6. After adding the bot:
    - Enable Developer Mode in Discord (User Settings > Advanced > Developer Mode)
    - Right-click on your server and select "Copy ID" for `DISCORD_GUILD_ID`
-   - Right-click on your default channel and select "Copy ID" for `DEFAULT_CHANNEL_ID`
+   - Right-click on your default channel and select "Copy ID" for `DISCORD_DEFAULT_CHANNEL_ID`
 
 ## Step 5: Configure Google Sheets Data Sources
 
@@ -62,10 +62,10 @@ Collect the following credentials that you'll need for your `.env.local` file:
    ```
    # Discord Bot Configuration
    DISCORD_PUBLIC_KEY=your_discord_public_key_here
-   APPLICATION_ID=your_discord_application_id_here
+   DISCORD_APPLICATION_ID=your_discord_application_id_here
    DISCORD_GUILD_ID=your_discord_guild_id_here
-   DEFAULT_CHANNEL_ID=your_default_channel_id_here
-   BOT_TOKEN=your_discord_bot_token_here
+   DISCORD_DEFAULT_CHANNEL_ID=your_default_channel_id_here
+   DISCORD_BOT_TOKEN=your_discord_bot_token_here
 
    # Application Security
    SECRET=your_secret_key_here

@@ -13,11 +13,11 @@ export async function GET(request: NextRequest) {
   const locations = await getLocations();
 
   const data = await fetch(
-    `https://discord.com/api/v10/applications/${process.env.APPLICATION_ID!}/guilds/${process.env.DISCORD_GUILD_ID!}/commands`,
+    `https://discord.com/api/v10/applications/${process.env.DISCORD_APPLICATION_ID!}/guilds/${process.env.DISCORD_GUILD_ID!}/commands`,
     {
       method: "PUT",
       headers: {
-        Authorization: `Bot ${process.env.BOT_TOKEN!}`,
+        Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN!}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify([

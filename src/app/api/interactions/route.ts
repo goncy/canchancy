@@ -49,13 +49,12 @@ export async function POST(request: Request) {
               })
               .join("");
 
-            await sendFollowupMessage(body.application_id, body.token, content);
+            await sendFollowupMessage(body.token, content);
           } catch (error) {
             console.error("Error processing teams:", error);
 
             try {
               await sendFollowupMessage(
-                body.application_id,
                 body.token,
                 "❌ Ocurrió un error al generar los equipos. Por favor, intenta nuevamente.",
               );
