@@ -1,6 +1,7 @@
 import {NextResponse} from "next/server";
+import {after} from "next/server";
 
-import {getMessage, verifyRequest} from "@/lib/discord";
+import {getMessage, verifyRequest, sendFollowupMessage} from "@/lib/discord";
 import {getCourts} from "@/lib/atc";
 import {getTeamsFromMessage} from "@/lib/dincy";
 
@@ -31,23 +32,42 @@ export async function POST(request: Request) {
       case "equipos": {
         const [messageId, teamsCount] = body.data.options!;
 
-        const message = await getMessage(messageId.value as string, body.channel_id);
-        const teams = await getTeamsFromMessage(
-          message.content,
-          teamsCount?.value ? Number(teamsCount.value) : 2,
-        );
+        // Use after to process teams generation after responding
+        after(async () => {
+          try {
+            const message = await getMessage(messageId.value as string, body.channel_id!);
+            const teams = await getTeamsFromMessage(
+              message.content,
+              teamsCount?.value ? Number(teamsCount.value) : 2,
+            );
 
-        return NextResponse.json({
-          type: 4,
-          data: {
-            content: teams
+            const content = teams
               .map((team, index) => {
                 const teamList = team.map((player) => `• ${player.name}`).join("\n");
 
                 return index === teams.length - 1 ? teamList : `${teamList}\n\n**VS**\n\n`;
               })
-              .join(""),
-          },
+              .join("");
+
+            await sendFollowupMessage(body.application_id, body.token, content);
+          } catch (error) {
+            console.error("Error processing teams:", error);
+
+            try {
+              await sendFollowupMessage(
+                body.application_id,
+                body.token,
+                "❌ Ocurrió un error al generar los equipos. Por favor, intenta nuevamente.",
+              );
+            } catch (followupError) {
+              console.error("Failed to send error message to Discord:", followupError);
+            }
+          }
+        });
+
+        // Immediately respond with deferred response to avoid timeout
+        return NextResponse.json({
+          type: 5, // DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE
         });
       }
 

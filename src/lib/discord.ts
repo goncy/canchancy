@@ -6,8 +6,8 @@ type DiscordInteraction = {
   type: number; // 1 = PING, 2 = APPLICATION_COMMAND, etc.
   id: string; // ID de la interacción
   application_id: string; // ID de la aplicación (bot)
-  guild_id?: string; // Opcional, solo si el comando se ejecuta en un servidor
-  channel_id?: string; // Opcional, si el comando se ejecuta en un canal
+  guild_id?: string; // Optional, only if the command is executed in a server
+  channel_id?: string; // Optional, only if the command is executed in a channel
   member?: {
     user: {
       id: string;
@@ -81,14 +81,15 @@ export async function getMessage(
   messageId: string,
   channelId: string = process.env.DEFAULT_CHANNEL_ID!,
 ): Promise<DiscordMessage> {
-  const url = `https://discord.com/api/v10/channels/${channelId}/messages/${messageId}`;
-
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bot ${process.env.BOT_TOKEN}`,
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `https://discord.com/api/v10/channels/${channelId}/messages/${messageId}`,
+    {
+      headers: {
+        Authorization: `Bot ${process.env.BOT_TOKEN}`,
+        "Content-Type": "application/json",
+      },
     },
-  });
+  );
 
   if (!response.ok) {
     const errorBody = await response.text().catch(() => "No error body");
@@ -104,4 +105,28 @@ export async function getMessage(
   const message = await response.json();
 
   return message;
+}
+
+export async function sendFollowupMessage(
+  applicationId: string,
+  interactionToken: string,
+  content: string,
+): Promise<void> {
+  const response = await fetch(
+    `https://discord.com/api/v10/webhooks/${applicationId}/${interactionToken}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bot ${process.env.BOT_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        content,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Discord followup failed: ${response.status} ${response.statusText}`);
+  }
 }
