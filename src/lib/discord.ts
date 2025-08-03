@@ -107,12 +107,12 @@ export async function getMessage(
   return message;
 }
 
-export async function sendFollowupMessage(
-  interactionToken: string,
+export async function sendInteractionFollowupMessage(
+  interaction: DiscordInteraction,
   content: string,
 ): Promise<void> {
   const response = await fetch(
-    `https://discord.com/api/v10/webhooks/${process.env.DISCORD_DISCORD_APPLICATION_ID}/${interactionToken}`,
+    `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}`,
     {
       method: "POST",
       headers: {

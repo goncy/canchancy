@@ -1,23 +1,23 @@
 import {NextResponse} from "next/server";
 import {after} from "next/server";
 
-import {getMessage, verifyRequest, sendFollowupMessage} from "@/lib/discord";
+import {getMessage, verifyRequest, sendInteractionFollowupMessage} from "@/lib/discord";
 import {getCourts} from "@/lib/atc";
 import {getTeamsFromMessage} from "@/lib/dincy";
 
 export async function POST(request: Request) {
-  const body = await verifyRequest(request);
+  const interaction = await verifyRequest(request);
 
   // Handle ping
-  if (body.type === 1) {
+  if (interaction.type === 1) {
     return NextResponse.json({type: 1});
   }
 
   // Handle command
-  if (body.type === 2) {
-    switch (body.data?.name) {
+  if (interaction.type === 2) {
+    switch (interaction.data?.name) {
       case "reserva": {
-        const [court, date] = body.data.options!;
+        const [court, date] = interaction.data.options!;
 
         const courts = await getCourts(court.value as string, date.value as string);
 
@@ -30,18 +30,18 @@ export async function POST(request: Request) {
       }
 
       case "equipos": {
-        const [messageId, teamsCount] = body.data.options!;
+        const [messageId, teamsCount] = interaction.data.options!;
 
         // Use after to process teams generation after responding
         after(async () => {
           try {
-            const message = await getMessage(messageId.value as string, body.channel_id!);
+            const message = await getMessage(messageId.value as string, interaction.channel_id!);
             const teams = await getTeamsFromMessage(
               message.content,
               teamsCount?.value ? Number(teamsCount.value) : 2,
             );
 
-            const content = teams
+            const teamsMessage = teams
               .map((team, index) => {
                 const teamList = team.map((player) => `• ${player.name}`).join("\n");
 
@@ -49,14 +49,14 @@ export async function POST(request: Request) {
               })
               .join("");
 
-            await sendFollowupMessage(body.token, content);
+            await sendInteractionFollowupMessage(interaction, teamsMessage);
           } catch (error) {
             console.error("Error processing teams:", error);
 
             try {
-              await sendFollowupMessage(
-                body.token,
-                "❌ Ocurrió un error al generar los equipos. Por favor, intenta nuevamente.",
+              await sendInteractionFollowupMessage(
+                interaction,
+                "❌ Ocurrió un error al generar los equipos. Por favor, asegurate de que el mensaje exista en este canal e intenta nuevamente.",
               );
             } catch (followupError) {
               console.error("Failed to send error message to Discord:", followupError);
